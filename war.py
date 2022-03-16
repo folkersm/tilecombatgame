@@ -29,6 +29,10 @@ class Creature:
         self.x_coord = -1
         self.y_coord = -1
 
+    def move(self, xcoord, ycoord):
+        self.x_coord = xcoord
+        self.y_coord = ycoord
+
 # x = Creature(1)
 # sdfasdfwer = Creature(1)
 # rasdf = Creature(1)
@@ -59,9 +63,13 @@ gameboard = [[0,0,0,0,0,0,0],
 def moveCreature(player, cx, cy, dx, dy):
     if (player == 1):
         if (gameboard[cx][cy] in Creature.alist):
-            if (gameboard[dx][dy])
+            if (gameboard[dx][dy] == 0):
+                tempcreature = gameboard[cx][cy]
+                tempcreature.move(dx, dy)
+                gameboard[dx][dy] = tempcreature
+                gameboard[cx][cy] = 0
         else: print("You didn't select a character")
-    if (player == 2):
+    elif (player == 2):
         if (gameboard[cx][cy] in Creature.alist):
             pass
         else: print("You didn't select a character")
@@ -78,11 +86,8 @@ while(running):
         running = False
     else:
         if (infoturn[0] == "M"):
-            if (gameboard[int(infoturn[1])][int(infoturn[2])] == 0):
-                print("You moved")
-            else:
-                print("")
-        if (infoturn[0] == "P"):
+            moveCreature(turn%2+1, int(infoturn[1]), int(infoturn[2]), int(infoturn[3]), int(infoturn[4]))
+        elif (infoturn[0] == "P"):
             print("You passed")
         else:
             print("Not a valid command")
