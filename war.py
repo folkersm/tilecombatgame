@@ -49,7 +49,7 @@ turn = 0
 oneprompt = "Player 1, enter a command:"
 twoprompt = "Player 2, enter a command:"
 statement = ""
-gameboard = [[0,0,0,0,0,0,0],
+gameboard = [[Creature(1),0,0,0,0,0,0],
              [0,0,0,0,0,0,0],
              [0,0,0,0,0,0,0],
              [0,0,0,0,0,0,0],
@@ -62,7 +62,7 @@ gameboard = [[0,0,0,0,0,0,0],
              [0,0,0,0,0,0,0],
              [0,0,0,0,0,0,0],
              [0,0,0,0,0,0,0],
-             [0,Creature(1),0,0,0,0,0],
+             [0,0,0,0,0,0,0],
              [0,0,0,0,0,0,0]]
 
 def moveCreature(player, cx, cy, dx, dy):
@@ -73,21 +73,34 @@ def moveCreature(player, cx, cy, dx, dy):
                 tempcreature.move(dx, dy)
                 gameboard[dx][dy] = tempcreature
                 gameboard[cx][cy] = 0
-            else: print("you can't place a block there")
-        else: print("You didn't select a character")
+            else:
+                print("you can't move there")
+                return False
+
+        else:
+            print("You didn't select a character")
+            return False
     elif (player == 2):
         if (gameboard[cx][cy] in Creature.blist):
-            if (gameboard[dx][dy] == 0):
+            if (gameboard[dx][dy] == 0 and abs(cx - dx) < 2 and abs(cy - dy) < 2):
                 tempcreature = gameboard[cx][cy]
                 tempcreature.move(dx, dy)
                 gameboard[dx][dy] = tempcreature
                 gameboard[cx][cy] = 0
-        else: print("You didn't select a character")
+            else:
+                print("you can't move there")
+                return False
+
+        else:
+            print("You didn't select a character")
+            return False
     else: print("player selection error")
 
 def placeBlock(player, cx, cy, bx, by):
     if(player ==1):
-        if (isinstance(gameboard[bx][by], int) and abs(cx-bx)< 2 and abs(cy-by)<2):
+        x_seperation = abs(cx-bx)
+        y_seperation = abs(cy - by)
+        if (isinstance(gameboard[bx][by], int) and x_seperation <2 and y_seperation <2 and (x_seperation!=0 and y_seperation !=0)):
             gameboard[bx][by] += 1
         else:
             return True
@@ -104,7 +117,9 @@ while(running):
         running = False
     else:
         if (infoturn[0] == "M"):
-            moveCreature(currentPlayer, int(infoturn[1]), int(infoturn[2]), int(infoturn[3]), int(infoturn[4]))
+            if moveCreature(currentPlayer, int(infoturn[1]), int(infoturn[2]), int(infoturn[3]), int(infoturn[4])):
+                turn -= 1
+                print("movement error #1")#                                                                                                                                                         Error 1
         elif (infoturn[0] == "B"):
             if(placeBlock(currentPlayer, int(infoturn[1]), int(infoturn[2]), int(infoturn[3]), int(infoturn[4]))):
                 turn -= 1
