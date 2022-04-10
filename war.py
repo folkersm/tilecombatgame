@@ -75,11 +75,10 @@ def moveCreature(player, cx, cy, dx, dy):
                 gameboard[cx][cy] = 0
             else:
                 print("you can't move there")
-                return False
-
+                return True
         else:
             print("You didn't select a character")
-            return False
+            return True
     elif (player == 2):
         if (gameboard[cx][cy] in Creature.blist):
             if (gameboard[dx][dy] == 0 and abs(cx - dx) < 2 and abs(cy - dy) < 2):
@@ -89,12 +88,13 @@ def moveCreature(player, cx, cy, dx, dy):
                 gameboard[cx][cy] = 0
             else:
                 print("you can't move there")
-                return False
-
+                return True
         else:
             print("You didn't select a character")
-            return False
-    else: print("player selection error")
+            return True
+    else:
+        print("player selection error")
+        return True
 
 def placeBlock(player, cx, cy, bx, by):
     if(player ==1):
