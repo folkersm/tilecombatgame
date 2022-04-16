@@ -2,17 +2,31 @@ import numpy
 #import kivy
 ccounter =0
 
+itemnamelist = ["block", "farm", "armory", "beacon", "armorHand", "knife", "tool", "armorBody", "person", "gun"]
+class Player:
+    def __init__(self):
+        self.money = 3
+        self.gameObjects = [0, 3, 0, 3,0, 3,0, 5,0, 3,0, 3,0, 3,0,3,0, 2, 0, 3]
 
+    def purchaseItem(self, item):
+        if (item == 6):
+            self.gameObjects[7] = 5*self.gameObjects[6] + 5
+        if (item == 16):
+            self.gameObjects[17] = 2*self.gameObjects[16]
+        if (self.money >= self.gameObjects[item+1]):
+            self.money -= self.gameObjects[item+1]
+            self.gameObjects[item] += 1
+            return -1
+        else: return self.gameObjects[item+1]
 
-
-
+playerOne = Player()
+playerTwo = Player()
 
 class Creature:
     acounter =1
     bcounter = 1
     alist = []
     blist = []
-
 
     def __init__(self, player):
         self.owner = player
@@ -34,8 +48,6 @@ class Creature:
     def move(self, xcoord, ycoord):
         self.x_coord = xcoord
         self.y_coord = ycoord
-
-
 
 # x = Creature(1)
 # sdfasdfwer = Creature(1)
@@ -105,8 +117,24 @@ def placeBlock(player, cx, cy, bx, by):
         else:
             return True
 
+def purchaseItem(item, player):
+    if (player == 1):
+        return playerOne.purchaseItem(item)
+    if (player == 2):
+        return playerTwo.purchaseItem(item)
+
+
+playerList: list[Player] = [playerOne, playerTwo]
+
+
 while(running):
     currentPlayer = turn%2+1
+
+    print("Player "+str(currentPlayer)+" Stuff:")
+    print("money: " + str(playerList[currentPlayer - 1].money))
+    for i in range(10):
+        print(itemnamelist[i] + ": " + str(playerList[currentPlayer - 1].gameObjects[2 * i]))
+
     print(numpy.matrix(gameboard))
     if (turn%2 == 0): statement=oneprompt
     else: statement = twoprompt
@@ -126,6 +154,10 @@ while(running):
                 print("you can't place a block there")
         elif (infoturn[0] == "P"):
             print("You passed")
+        elif (infoturn[0] == "S"):
+            if(purchaseItem(int(infoturn[1]), currentPlayer) > 0):
+                turn -= 1
+                print("Not enough money")
         else:
             print("Not a valid command")
             turn -= 1
