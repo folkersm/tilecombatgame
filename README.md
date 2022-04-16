@@ -1,2 +1,2 @@
 # TileCombatGame
-This is a board game I created that I am making into a video game. 
+I made a board game, now I'm programming it as a computer game. 
