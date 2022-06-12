@@ -6,16 +6,17 @@ itemnamelist = ["block", "farm", "armory", "beacon", "armorHand", "knife", "tool
 class Player:
     def __init__(self):
         self.money = 3
-        self.gameObjects = [0, 3, 0, 3,0, 3,0, 5,0, 3,0, 3,0, 3,0,3,0, 2, 0, 3]
+        self.gameObjects = [["block",0,3],["farm",0,3],["armory",0,3],["beacon",0,5],["armorHand",0,3],["knife",0,3],["tool",0,3],["armorBody",0,3],["person",0,2],["gun",0,3]]
+
 
     def purchaseItem(self, item):
-        if (item == 6):
-            self.gameObjects[7] = 5*self.gameObjects[6] + 5
-        if (item == 16):
-            self.gameObjects[17] = 2*self.gameObjects[16]
-        if (self.money >= self.gameObjects[item+1]):
-            self.money -= self.gameObjects[item+1]
-            self.gameObjects[item] += 1
+        if (item == 3):
+            self.gameObjects[3][2] = 5*self.gameObjects[3][1] + 5
+        if (item == 8):
+            self.gameObjects[8] = 2*self.gameObjects[8][1]
+        if (self.money >= self.gameObjects[item][2]):
+            self.money -= self.gameObjects[item][2]
+            self.gameObjects[item][1] += 1
             return -1
         else: return self.gameObjects[item+1]
 
@@ -124,7 +125,7 @@ def purchaseItem(item, player):
         return playerTwo.purchaseItem(item)
 
 
-playerList: list[Player] = [playerOne, playerTwo]
+playerList = [playerOne, playerTwo]
 
 
 while(running):
