@@ -22,47 +22,7 @@ class Player:
 
 playerOne = Player()
 playerTwo = Player()
-
-class Creature:
-    acounter =1
-    bcounter = 1
-    alist = []
-    blist = []
-
-    def __init__(self, player):
-        self.owner = player
-        self.blockmove = True
-        self.movement = True
-        self.attack = True
-
-        if(player == 1):
-            self.id = Creature.acounter
-            Creature.acounter += 1
-            Creature.alist.append(self)
-        if (player == 2):
-            self.id = Creature.bcounter
-            Creature.bcounter += 1
-            Creature.blist.append(self)
-        self.x_coord = -10
-        self.y_coord = -10
-
-    def move(self, xcoord, ycoord):
-        self.x_coord = xcoord
-        self.y_coord = ycoord
-
-# x = Creature(1)
-# sdfasdfwer = Creature(1)
-# rasdf = Creature(1)
-# werwer = Creature(1)
-# asdfasdfwe = Creature(2)
-# print(Creature.blist)
-
-running = True
-turn = 0
-oneprompt = "Player 1, enter a command:"
-twoprompt = "Player 2, enter a command:"
-statement = ""
-gameboard = [[Creature(1),0,0,0,0,0,0],
+gameboard = [[0,0,0,0,0,0,0],
              [0,0,0,0,0,0,0],
              [0,0,0,0,0,0,0],
              [0,0,0,0,0,0,0],
@@ -78,45 +38,93 @@ gameboard = [[Creature(1),0,0,0,0,0,0],
              [0,0,0,0,0,0,0],
              [0,0,0,0,0,0,0]]
 
+playerList = [playerOne, playerTwo]
+class Beacon:
+    acounter = 1
+    bcounter = 1
+    alist = []
+    blist = []
+
+    def __init__(self,player, location):
+        self.owner = player
+        self.location = location
+
+class Farm:
+    def __init__(self, location):
+        self.location = location
+
+class Creature:
+    acounter =1
+    bcounter = 1
+    alist = []
+    blist = []
+    creatureLists = [alist, blist]
+
+    def __init__(self, player, coordsArray):
+        self.owner = player
+        self.blockmove = True
+        self.movement = True
+        self.attack = True
+
+        if(player == 1):
+            self.id = Creature.acounter
+            Creature.acounter += 1
+            Creature.alist.append(self)
+        if (player == 2):
+            self.id = Creature.bcounter
+            Creature.bcounter += 1
+            Creature.blist.append(self)
+        self.x_coord = coordsArray[0]
+        self.y_coord = coordsArray[1]
+        gameboard[self.x_coord][self.y_coord] = self
+
+    def move(self, xcoord, ycoord):
+        gameboard[self.x_coord][self.y_coord] = 0
+        self.x_coord = xcoord
+        self.y_coord = ycoord
+        gameboard[self.x_coord][self.y_coord] = self
+
+# x = Creature(1)
+# sdfasdfwer = Creature(1)
+# rasdf = Creature(1)
+# werwer = Creature(1)
+# asdfasdfwe = Creature(2)
+# print(Creature.blist)
+
+running = True
+turn = 0
+oneprompt = "Player 1, enter a command:"
+twoprompt = "Player 2, enter a command:"
+statement = ""
+
+
 def moveCreature(player, cx, cy, dx, dy):
-    if (player == 1):
-        if (gameboard[cx][cy] in Creature.alist):
-            if (gameboard[dx][dy] == 0 and abs(cx-dx)< 2 and abs(cy-dy)<2):
-                tempcreature = gameboard[cx][cy]
-                tempcreature.move(dx, dy)
-                gameboard[dx][dy] = tempcreature
-                gameboard[cx][cy] = 0
-            else:
-                print("you can't move there")
-                return True
+    if (gameboard[cx][cy] in Creature.creatureLists[player-1]):
+        if (gameboard[dx][dy] == 0 and abs(cx-dx)< 2 and abs(cy-dy)<2):
+            gameboard[cx][cy].move(dx,dy)
         else:
-            print("You didn't select a character")
-            return True
-    elif (player == 2):
-        if (gameboard[cx][cy] in Creature.blist):
-            if (gameboard[dx][dy] == 0 and abs(cx - dx) < 2 and abs(cy - dy) < 2):
-                tempcreature = gameboard[cx][cy]
-                tempcreature.move(dx, dy)
-                gameboard[dx][dy] = tempcreature
-                gameboard[cx][cy] = 0
-            else:
-                print("you can't move there")
-                return True
-        else:
-            print("You didn't select a character")
+            print("you can't move there")
             return True
     else:
-        print("player selection error")
+        print("You didn't select a character")
         return True
 
 def placeBlock(player, cx, cy, bx, by):
-    if(player ==1):
+    if (playerList[player-1].gameObjects[0][1] > 0 and type(gameboard[bx][by]) is int and gameboard[cx][cy] in Creature.creatureLists[player-1]):
         x_seperation = abs(cx-bx)
         y_seperation = abs(cy - by)
-        if (isinstance(gameboard[bx][by], int) and x_seperation <2 and y_seperation <2 and (x_seperation!=0 and y_seperation !=0)):
-            gameboard[bx][by] += 1
-        else:
+        if (x_seperation + y_seperation == 0 or x_seperation> 1 or y_seperation > 1):
             return True
+        else:
+            gameboard[bx][by] += 1
+    else: return True
+
+def upgradeBlock(player, upgrade, cx, cy, bx, by):
+    if (playerList[player-1].gameObjects[upgrade][1]==0):
+        return True
+    else: return True
+
+
 
 def purchaseItem(item, player):
     if (player == 1):
@@ -125,8 +133,7 @@ def purchaseItem(item, player):
         return playerTwo.purchaseItem(item)
 
 
-playerList = [playerOne, playerTwo]
-
+creature1 = Creature(1, [1, 1])
 
 while(running):
     currentPlayer = turn%2+1
@@ -134,7 +141,7 @@ while(running):
     print("Player "+str(currentPlayer)+" Stuff:")
     print("money: " + str(playerList[currentPlayer - 1].money))
     for i in range(10):
-        print(itemnamelist[i] + ": " + str(playerList[currentPlayer - 1].gameObjects[2 * i]))
+        print(itemnamelist[i] + ": " + str(playerList[currentPlayer - 1].gameObjects[i][1]))
 
     print(numpy.matrix(gameboard))
     if (turn%2 == 0): statement=oneprompt
@@ -152,7 +159,7 @@ while(running):
         elif (infoturn[0] == "B"):
             if(placeBlock(currentPlayer, int(infoturn[1]), int(infoturn[2]), int(infoturn[3]), int(infoturn[4]))):
                 turn -= 1
-                print("you can't place a block there")
+                print("Failed to place block.")
         elif (infoturn[0] == "P"):
             print("You passed")
         elif (infoturn[0] == "S"):
