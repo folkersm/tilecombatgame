@@ -39,19 +39,26 @@ gameboard = [[0,0,0,0,0,0,0],
              [0,0,0,0,0,0,0]]
 
 playerList = [playerOne, playerTwo]
-class Beacon:
+class Upgrade:
+    def __init__(self, location):
+        self.location = location
+
+    def move(self, moveLocation):
+        self.location = moveLocation
+
+class Beacon(Upgrade):
     acounter = 1
     bcounter = 1
     alist = []
     blist = []
 
-    def __init__(self,player, location):
-        self.owner = player
-        self.location = location
+    def __init__(self, location):
+        super().__init__(location)
+
 
 class Farm:
     def __init__(self, location):
-        self.location = location
+
 
 class Creature:
     acounter =1
@@ -120,11 +127,12 @@ def placeBlock(player, cx, cy, bx, by):
     else: return True
 
 def upgradeBlock(player, upgrade, cx, cy, bx, by):
-    if (playerList[player-1].gameObjects[upgrade][1]==0):
+    if (playerList[player-1].gameObjects[upgrade][1]==0 or type(gameboard[bx][by]) is not int):
         return True
+    elif (gameboard[bx][by] > 2):
+
+
     else: return True
-
-
 
 def purchaseItem(item, player):
     if (player == 1):
