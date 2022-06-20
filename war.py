@@ -1,4 +1,5 @@
 import numpy
+import random
 #import kivy
 ccounter =0
 
@@ -6,7 +7,7 @@ itemnamelist = ["block", "farm", "armory", "beacon", "armorHand", "knife", "tool
 class Player:
     def __init__(self):
         self.money = 3
-        self.gameObjects = [["block",0,3],["farm",0,3],["armory",0,3],["beacon",0,5],["armorHand",0,3],["knife",0,3],["tool",0,3],["armorBody",0,3],["person",0,2],["gun",0,3]]
+        self.gameObjects = [["block",8,3],["farm",2,3],["armory",2,3],["beacon",2,5],["armorHand",0,3],["knife",0,3],["tool",0,3],["armorBody",0,3],["person",0,2],["gun",0,3]]
 
 
     def purchaseItem(self, item):
@@ -22,8 +23,8 @@ class Player:
 
 playerOne = Player()
 playerTwo = Player()
-gameboard = [[0,0,0,0,0,0,0],
-             [0,0,0,0,0,0,0],
+gameboard = [[0,3,0,0,0,0,0],
+             [1,2,0,0,0,0,0],
              [0,0,0,0,0,0,0],
              [0,0,0,0,0,0,0],
              [0,0,0,0,0,0,0],
@@ -40,11 +41,24 @@ gameboard = [[0,0,0,0,0,0,0],
 
 playerList = [playerOne, playerTwo]
 class Upgrade:
-    def __init__(self, location):
-        self.location = location
+    def __init__(self, id):
+        self.id = id
+        self.in_stash = True
 
-    def move(self, moveLocation):
-        self.location = moveLocation
+    def move(self, moveLocation, player):
+        if (type(gameboard[moveLocation[0]][moveLocation[1]]) is int):
+            if (gameboard[moveLocation[0]][moveLocation[1]] > self.id-1):
+                playerList[player-1].gameObjects[self.id][1] -= 1
+                self.block_base = gameboard[moveLocation[0]][moveLocation[1]]
+                self.location = moveLocation
+                self.in_stash = False
+                gameboard[moveLocation[0]][moveLocation[1]] = self
+            else: return True
+        else: return True
+
+    def put_in_stash(self, player):
+        playerList[player-1].gameObjects[self.id][1] += 1
+        self.in_stash = True
 
 class Beacon(Upgrade):
     acounter = 1
@@ -52,13 +66,36 @@ class Beacon(Upgrade):
     alist = []
     blist = []
 
-    def __init__(self, location):
-        super().__init__(location)
+    def __init__(self):
+        super().__init__(3)
 
 
-class Farm:
-    def __init__(self, location):
+class Farm(Upgrade):
+    probability_to_grow = [0, 1/4, 1/8, 1/16, 0]
+    yeild = [0, 0, 1, 2, 4]
+    def __init__(self):
+        super().__init__(1)
+        self.phase = 1
+        self.stage = 0
 
+    def harvest(self, player):
+        playerList[player - 1].money += Farm.yeild[self.stage]
+        self.stage = 0
+        self.phase = 0
+
+    def grow(self):
+        if (random.random() < self.phase * Farm.probability_to_grow[self.stage]):
+            self.phase = 0
+            self.stage += 1
+        else: self.phase += 1
+
+    def plant(self):
+        if (self.stage == 0):
+            self.stage += 1
+
+class Armory(Upgrade):
+    def __init__(self):
+        super().__init__(2)
 
 class Creature:
     acounter =1
@@ -67,7 +104,7 @@ class Creature:
     blist = []
     creatureLists = [alist, blist]
 
-    def __init__(self, player, coordsArray):
+    def __init__(self, player):
         self.owner = player
         self.blockmove = True
         self.movement = True
@@ -81,15 +118,14 @@ class Creature:
             self.id = Creature.bcounter
             Creature.bcounter += 1
             Creature.blist.append(self)
-        self.x_coord = coordsArray[0]
-        self.y_coord = coordsArray[1]
-        gameboard[self.x_coord][self.y_coord] = self
 
     def move(self, xcoord, ycoord):
-        gameboard[self.x_coord][self.y_coord] = 0
+        try:gameboard[self.x_coord][self.y_coord] = 0
+        except:pass
         self.x_coord = xcoord
         self.y_coord = ycoord
         gameboard[self.x_coord][self.y_coord] = self
+
 
 # x = Creature(1)
 # sdfasdfwer = Creature(1)
@@ -127,11 +163,29 @@ def placeBlock(player, cx, cy, bx, by):
     else: return True
 
 def upgradeBlock(player, upgrade, cx, cy, bx, by):
-    if (playerList[player-1].gameObjects[upgrade][1]==0 or type(gameboard[bx][by]) is not int):
+    distance_factor = True
+    if (abs(cx-bx) < 2 and abs(cy-by) < 2 and abs(cx-bx) + abs(cy-by) != 0):
+        distance_factor = False
+    if (playerList[player-1].gameObjects[upgrade][1]==0 or type(gameboard[bx][by]) is not int or distance_factor):
         return True
-    elif (gameboard[bx][by] > 2):
+    else:
+        if (upgrade == 1):
+            if (playerList[player-1].gameObjects[upgrade][1] > 0):
+                Farm().move([bx, by], player)
+            else: return True
+        if (upgrade == 2):
+            if (playerList[player-1].gameObjects[upgrade][1] > 0):
+                Armory().move([bx, by], player)
+            else: return True
+        if (upgrade == 3):
+            if (playerList[player-1].gameObjects[upgrade][1] > 0):
+                Beacon().move([bx, by], player)
+            else: return True
+        else: return True
 
-
+def harvest(player, cx, cy, bx, by):
+    if (abs(cx - bx) < 2 and abs(cy - by) < 2 and gameboard[bx][by] is Farm):
+        gameboard[bx][by].harvest(player)
     else: return True
 
 def purchaseItem(item, player):
@@ -141,7 +195,8 @@ def purchaseItem(item, player):
         return playerTwo.purchaseItem(item)
 
 
-creature1 = Creature(1, [1, 1])
+creature1 = Creature(1)
+creature1.move(0, 0)
 
 while(running):
     currentPlayer = turn%2+1
@@ -155,25 +210,29 @@ while(running):
     if (turn%2 == 0): statement=oneprompt
     else: statement = twoprompt
     move = input(statement)
-    infoturn = move.split(" ")
+    turn_info = move.split(" ")
 
     if (move == "stop"):
         running = False
     else:
-        if (infoturn[0] == "M"):
-            if moveCreature(currentPlayer, int(infoturn[1]), int(infoturn[2]), int(infoturn[3]), int(infoturn[4])):
+        if (turn_info[0] == "M"):
+            if moveCreature(currentPlayer, int(turn_info[1]), int(turn_info[2]), int(turn_info[3]), int(turn_info[4])):
                 turn -= 1
                 print("movement error #1")#                                                                                                                                                         Error 1
-        elif (infoturn[0] == "B"):
-            if(placeBlock(currentPlayer, int(infoturn[1]), int(infoturn[2]), int(infoturn[3]), int(infoturn[4]))):
+        elif (turn_info[0] == "B"):
+            if(placeBlock(currentPlayer, int(turn_info[1]), int(turn_info[2]), int(turn_info[3]), int(turn_info[4]))):
                 turn -= 1
                 print("Failed to place block.")
-        elif (infoturn[0] == "P"):
+        elif (turn_info[0] == "P"):
             print("You passed")
-        elif (infoturn[0] == "S"):
-            if(purchaseItem(int(infoturn[1]), currentPlayer) > 0):
+        elif (turn_info[0] == "S"):
+            if(purchaseItem(int(turn_info[1]), currentPlayer) > 0):
                 turn -= 1
                 print("Not enough money")
+        elif (turn_info[0] == "U"):
+            if(upgradeBlock(currentPlayer, int(turn_info[1]), int(turn_info[2]),int(turn_info[3]),int(turn_info[4]),int(turn_info[5]))):
+                turn -= 1
+                print("upgrade " + itemnamelist[int(turn_info[1])] + " failed")
         else:
             print("Not a valid command")
             turn -= 1
