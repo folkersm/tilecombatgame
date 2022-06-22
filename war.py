@@ -23,7 +23,7 @@ class Player:
 
 playerOne = Player()
 playerTwo = Player()
-gameboard = [[0,3,0,0,0,0,0],
+gameboard = [[0,0,0,0,0,0,0],
              [1,2,0,0,0,0,0],
              [0,0,0,0,0,0,0],
              [0,0,0,0,0,0,0],
@@ -173,11 +173,11 @@ def upgradeBlock(player, upgrade, cx, cy, bx, by):
             if (playerList[player-1].gameObjects[upgrade][1] > 0):
                 Farm().move([bx, by], player)
             else: return True
-        if (upgrade == 2):
+        elif (upgrade == 2):
             if (playerList[player-1].gameObjects[upgrade][1] > 0):
                 Armory().move([bx, by], player)
             else: return True
-        if (upgrade == 3):
+        elif (upgrade == 3):
             if (playerList[player-1].gameObjects[upgrade][1] > 0):
                 Beacon().move([bx, by], player)
             else: return True
