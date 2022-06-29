@@ -127,7 +127,11 @@ class Creature:
         self.y_coord = ycoord
         gameboard[self.x_coord][self.y_coord] = self
 
-class
+class Melee(Creature):
+    def __init__(self, player):
+        super().__init__(player)
+
+
 
 # x = Creature(1)
 # sdfasdfwer = Creature(1)
